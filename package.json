@@ -12,9 +12,9 @@
     "express-session": "^1.15.5",
     "express-validator": "^3.2.1",
     "moment": "^2.18.1",
-    "mysql": "^2.14.1"
+    "mysql": "^2.14.1",
+    "uuidv4": "^6.2.13"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

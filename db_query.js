@@ -24,7 +24,8 @@ module.exports = {
         getAgregatedQuantityValueByMedicineID:"select Medicine_ID,  sum(Quantity) as Total_Quantity from batch group by Medicine_ID;"
     },
     medicine_information:{
-        getMedicineByName:"SELECT * FROM medicine_information WHERE Medicine_Name = ? "
+        getMedicineByName:"SELECT * FROM medicine_information WHERE Medicine_Name = ? AND INNER JOIN batch ON medicine_information.id=batch.Medicine_ID",
+        getMedicineAvailability:"SELECT * FROM medicine_information INNER JOIN batch ON medicine_information.id=batch.Medicine_ID WHERE Medicine_Name = ?"
     },
     joins:{
         medicine_information_suppliers:"SELECT b.*, m.Medicine_Name, s.Supplier_Name FROM batch b INNER JOIN medicine_information m on b.Medicine_ID = m.ID INNER JOIN supplier s on b.Supplier_ID = s.ID",
@@ -32,8 +33,11 @@ module.exports = {
     },
     bill_information:{
         addBills: "INSERT INTO bill_information SET ?",
-        getBills: "SELECT * FROM bill_information",
+        getBills: "SELECT * FROM bill_information WHERE Tenant_ID=?",
 
+    },
+    cart:{
+        addToCart:"INSERT INTO cart SET ?",
     },
     drug_generic_name:{
         getGenericName:"SELECT * FROM drug_generic_name",

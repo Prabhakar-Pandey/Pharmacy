@@ -41,6 +41,13 @@ CREATE TABLE `batch` (
   `Supplier_ID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+CREATE TABLE `cart` (
+  `id` int(11) NOT NULL,
+  `Invoice_No` varchar(255) NOT NULL,
+  `Ordered_Item` varchar(255) NOT NULL,
+  `Tenant_ID` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 --
 -- Dumping data for table `batch`
 --
@@ -391,7 +398,8 @@ ALTER TABLE `user_information`
 --
 -- Constraints for dumped tables
 --
-
+ALTER TABLE `cart`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- Constraints for table `batch`
 --
@@ -424,10 +432,12 @@ COMMIT;
 
 ALTER TABLE batch RENAME COLUMN Purchase_ID to Invoice_ID;
 ALTER TABLE batch ADD Tenant_ID varchar(255);
+ALTER TABLE batch ADD Location_ID varchar(255);
 ALTER TABLE medicine_information ADD Tenant_ID varchar(255);
 ALTER TABLE user_access ADD Tenant_ID varchar(255);
 ALTER TABLE bill_information ADD Tenant_ID varchar(255);
 ALTER TABLE user_information ADD Tenant_ID varchar(255);
+ALTER TABLE cart ADD Tenant_ID varchar(255);
 
 
 UPDATE user_access SET Tenant_ID = 1 WHERE Usertype = 'Admin';

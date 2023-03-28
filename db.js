@@ -24,6 +24,9 @@ module.exports = {
         else
         {
             connection.query(sql, param, function(err,result){
+                if(err){
+                    console.log(err)
+                }
                 callback(result);
             });
         }
@@ -45,10 +48,16 @@ module.exports = {
             });
             if(param == null) {
                 connection.query(sql, function(err, result){
+                    if(err){
+                        reject(err)
+                    }
                     resolve(result)
                 });
             }else{
                 connection.query(sql, param, function(err,result){
+                    if(err){
+                        reject(err)
+                    }
                     resolve(result)
                 });
             }

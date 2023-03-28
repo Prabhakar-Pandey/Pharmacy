@@ -5,6 +5,7 @@ var db = require('../db');
 var async = require('async');
 var mysql = require('mysql');
 var DBQuery = require('../db_query');
+const { uuid } = require('uuidv4');
 
 
 router.use(bodyParser.urlencoded({
@@ -88,25 +89,33 @@ router.get('/', function (req, res) {
         });
     });
     
-
-    // res.render('view_admin', {
-    //     user: req.session.loggedUser
-    // });
 });
 
 
 
-router.get('/medicineSearch/:n', function (req, res) {
+router.post('/medicineSearch', function (req, res) {
 
-    var name = req.params.n;
+    var name = req.body.name;
     var query = DBQuery.medicine_information.getMedicineByName;
-
-    db.getData(query, [name], function (rows) {
-        var data = {
-            'result': rows[0]
+    
+    db.execute(DBQuery.medicine_information.getMedicineAvailability,[name]).then(data=>{
+        console.log(data)
+        const respObj = {
+            [name]:{}
         };
-        res.return(data);
-    });
+        (data||[]).forEach(item=>{
+            respObj[name] = {
+                Cost_Price:respObj[name].Cost_Price?Math.max(respObj[name].Cost_Price,item.Cost_Price):item.Cost_Price,
+                Sell_Price:respObj[name].Sell_Price?Math.max(respObj[name].Sell_Price,item.Sell_Price):item.Sell_Price,
+                Expire_Date:respObj[name].Expire_Date ? Math.min(respObj[name].Expire_Date,item.Expire_Date):item.Expire_Date,
+                Quantity:respObj[name].Quantity ? respObj[name].Quantity + item.Quantity : item.Quantity,
+                Medicine_ID:item.Medicine_ID,
+                Location_ID:item.Location_ID
+            }
+        })
+
+        res.send(JSON.stringify(respObj));
+    })
 });
 
 
@@ -135,9 +144,9 @@ router.get('/sale', function (req, res) {
         var data = {
             'batch': values[0],
             'agregatedDataMap':values[1],
-            user: req.session.loggedUser
+            user: req.session.loggedUser,
+            invoiceNumber: uuid()
         };
-        console.log(data,"<<<<<<<")
         res.render('new_sale', data);
     })
 
@@ -160,19 +169,26 @@ router.post('/sale', function (req, res) {
         Total_Payable: req.body.totalPayable,
         Paid: req.body.paid,
         Returned: req.body.return,
-        Date: req.body.entry_date
+        Date: req.body.entry_date,
+        Tenant_ID:req.session.Tenant_ID
     };
-    console.log(billInfo);
-    var query = DBQuery.bill_information.addBills;
-    db.getData(query, [billInfo], function (rows) {
-        console.log(rows);
+    var cart = {
+        Invoice_No: req.body.invoice_number,
+        Ordered_Item:req.body.purchagedItem,
+        Tenant_ID:req.session.Tenant_ID
+    }
+    console.log(">>>>>>CART", billInfo, req.body.purchagedItem);
+    Promise.all([]).then(values=>{
+        db.execute(DBQuery.cart.addToCart,[cart]),
+        db.execute(DBQuery.bill_information.addBills,[billInfo]) 
+    }).then(values=>{
         res.redirect('/admin/sale');
-    });
+    })
 });
 
 router.get('/saleshistory', function (req, res) {
     var query = DBQuery.bill_information.getBills;
-    db.getData(query, null, function (rows) {
+    db.getData(query, [req.session.Tenant_ID], function (rows) {
         var data = {
             'billInfo': rows,
             user: req.session.loggedUser

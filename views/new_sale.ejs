@@ -71,12 +71,12 @@
                             <div class="col-lg-5 col-lg-offset-3">
                                 <div class="form-group">
                                     <label for="invoice_number">Invoice Number</label>
-                                    <input type="text" class="form-control" id="invoice_number" name="invoice_number" placeholder="Invoice Name" required>
+                                    <input type="text" class="form-control" id="invoice_number" name="invoice_number" placeholder="Invoice Name" value="<%= invoiceNumber%>" required>
 
                                 </div>
                                 <div class="form-group">
                                     <label for="entry_date">Entry Date</label>
-                                    <input type="text" class="form-control" name="entry_date" id="entry_date" onkeydown="return false" required>
+                                    <input type="text" class="form-control" name="entry_date" id="entry_date" value="<%= new Date().toISOString().split('T')[0]%>" onkeydown="return false" required>
                                 </div>
                             </div>
                             <table class="table table-striped">
@@ -155,6 +155,10 @@
                             <input type="text" class="form-control" id="return" name="return" placeholder="Return" required>
 
                         </div>
+                        <div class="form-group">
+                            <input type="hidden" class="form-control" id="purchagedItem" name="purchagedItem" placeholder="Return">
+
+                        </div>
                         <br />
                         <br />
 
@@ -187,12 +191,17 @@
                 </script>
 
                 <script>
-                    $("#getMedicineName").keyup(function () {
+                    $("#getMedicineName").blur(function () {
+                        const medicineName = $('#getMedicineName').val().split('(')[0];
                         $.ajax({
                             url: "/admin/medicineSearch/",
-                            data: $('#getMedicineName').val(),
+                            method:"post",
+                            data: {name:medicineName},
                             success: function (result) {
-                                $("#getMedicineName").val(result);
+                                console.log(result)
+                                window.MedicineFactory = JSON.parse(result)
+                                //$("#getMedicineName").val(result);
+                                $('#getSellPrice').val(window.MedicineFactory[medicineName].Sell_Price||'');
                             }
                         });
                     });
@@ -221,7 +230,8 @@
 
                     //Calculate Amount based on input Quantity
                     $('#getQuantity').keyup(function () {
-                        var available = Number($('#getAvailability').val());
+                        const medicineName = $('#getMedicineName').val().split('(')[0];
+                        var available = window.MedicineFactory[medicineName].Quantity;
                         var quantity = Number($('#getQuantity').val());
                         var sellPrice = Number($('#getSellPrice').val());
                         if (quantity > available) {
@@ -238,10 +248,7 @@
                         var available = Number($('#getAvailability').val());
                         var quantity = Number($('#getQuantity').val());
                         var sellPrice = Number($('#getSellPrice').val());
-                        if (quantity > available) {
-                            $('#getQuantity').val(available);
-                            quantity = available;
-                        }
+                        
                         var amount = (quantity * sellPrice).toFixed(2);
                         $('#getAmount').val(amount);
                     });
@@ -342,6 +349,7 @@
 
                             $('#totalAmount').val(subTotal);
                             $('#totalPayable').val(subTotal);
+                            $('#purchagedItem').val(JSON.stringify(purchaseItems))
                         }
                     });
 
