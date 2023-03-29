@@ -349,8 +349,8 @@ router.get('/batch', function (req, res) {
     //staff checking
     check_staff(req, res);
 
-    var query = "SELECT b.*, m.Medicine_Name, s.Supplier_Name FROM batch b INNER JOIN medicine_information m on b.Medicine_ID = m.ID INNER JOIN supplier s on b.Supplier_ID = s.ID";
-    db.getData(query, null, function (rows) {
+    
+    db.getData(DBQuery.joins.batch_medicine_suplier, req.session.Tenant_ID, function (rows) {
         var data = {
             'batch': rows,
             'user': req.session.loggedUser,
@@ -449,20 +449,50 @@ router.post('/batch/create', function (req, res) {
                 Invoice_ID:req.body.invoice_id,
                 Medicine_ID: req.body.medicine_name,
                 Supplier_ID: req.body.supplier_name,
-                Tenant_ID:req.session.Tenant_ID
+                Tenant_ID:req.session.Tenant_ID,
             };
-            console.log(">>>>>",batch);
-            var query = "INSERT INTO batch SET ?";
-            db.getData(query, batch, function (rows,error) {
-                if(error){
-                    console.log(error,"error");
+
+            const inventory = {
+                Medicine_ID:req.body.medicine_name,
+                Total_count:req.body.quantity,
+                Tenant_ID:req.session.Tenant_ID,
+                Cost_Price: req.body.cost_price,
+                Sell_Price: req.body.sell_price,
+                Expire_Date: req.body.expire_date,
+            }
+            var arr = [
+                db.execute(DBQuery.batch.insertToBatch, batch),
+                //db.execute(DBQuery.inventory_master.addInventory, inventory),
+            ]
+
+            console.log(batch)
+
+            db.execute(DBQuery.inventory_master.fetchInventory,req.body.medicine_name).then(values=>{
+                console.log(values);
+                if(values.length){
+                    inventory.Total_count = String(Number(values[0].Total_count) + Number(req.body.quantity));
+                    arr.push(db.execute(DBQuery.inventory_master.updateInventory, [inventory,req.body.medicine_name]))
+                }else{
+                    arr.push(db.execute(DBQuery.inventory_master.addInventory, [inventory]))
+                }
+                console.log(">>>>>",batch);
+                Promise.all(arr).then(values=>{
+                    console.log("addede",values);
+                    res.redirect('/admin/batch');
+                }).catch(e=>{
+                    console.log(e,"<<<<<BATCH")
                     res.render('batch_create', {
                         errors: "Error in adding the batch!"
                     });
-                }
-                console.log("addede",rows);
-                res.redirect('/admin/batch');
-            });
+                })
+            }).catch(e=>{
+                console.log("error batch addition",e)
+                res.render('batch_create', {
+                    errors: "Error in adding the batch!"
+                });
+            })
+
+            
 
         }
     });

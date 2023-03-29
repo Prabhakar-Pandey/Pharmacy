@@ -21,7 +21,8 @@ module.exports = {
 
     },
     batch:{
-        getAgregatedQuantityValueByMedicineID:"select Medicine_ID,  sum(Quantity) as Total_Quantity from batch group by Medicine_ID;"
+        getAgregatedQuantityValueByMedicineID:"select Medicine_ID,  sum(Quantity) as Total_Quantity from batch group by Medicine_ID;",
+        insertToBatch:"INSERT INTO batch SET ?"
     },
     medicine_information:{
         getMedicineByName:"SELECT * FROM medicine_information WHERE Medicine_Name = ? AND INNER JOIN batch ON medicine_information.id=batch.Medicine_ID",
@@ -29,12 +30,18 @@ module.exports = {
     },
     joins:{
         medicine_information_suppliers:"SELECT b.*, m.Medicine_Name, s.Supplier_Name FROM batch b INNER JOIN medicine_information m on b.Medicine_ID = m.ID INNER JOIN supplier s on b.Supplier_ID = s.ID",
-        medicine_information_batch:"SELECT medicine_information.Medicine_Name, sum(batch.Quantity) as Total_Quantity FROM medicine_information INNER JOIN batch ON medicine_information.id=batch.Medicine_ID group by medicine_information.id"
+        medicine_information_batch:"SELECT medicine_information.Medicine_Name, sum(batch.Quantity) as Total_Quantity FROM medicine_information INNER JOIN batch ON medicine_information.id=batch.Medicine_ID group by medicine_information.id",
+        batch_medicine_suplier:"SELECT b.*, m.Medicine_Name, s.Supplier_Name FROM batch b INNER JOIN medicine_information m on b.Medicine_ID = m.ID INNER JOIN supplier s on b.Supplier_ID = s.ID WHERE b.Tenant_ID = ?"
     },
     bill_information:{
         addBills: "INSERT INTO bill_information SET ?",
         getBills: "SELECT * FROM bill_information WHERE Tenant_ID=?",
 
+    },
+    inventory_master:{
+        addInventory:"INSERT INTO inventory_master SET ?",
+        fetchInventory:"SELECT * FROM inventory_master WHERE Medicine_ID = ?",
+        updateInventory:"UPDATE inventory_master SET ? WHERE id = ?"
     },
     cart:{
         addToCart:"INSERT INTO cart SET ?",

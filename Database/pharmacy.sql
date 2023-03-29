@@ -398,6 +398,26 @@ ALTER TABLE `user_information`
 --
 -- Constraints for dumped tables
 --
+
+CREATE TABLE `inventory_master` (
+  `id` int(11) NOT NULL,
+  `Medicine_ID` varchar(50) NOT NULL,
+  `Total_count` varchar(50) NOT NULL,
+  `Tenant_ID` varchar(50) NOT NULL,
+  `Cost_Price` varchar(50) NOT NULL,
+  `Sell_Price` varchar(50) NOT NULL,
+  `Expire_Date` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+ALTER TABLE `inventory_master`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `inventory_master`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+ALTER TABLE `cart`
+  ADD PRIMARY KEY (`id`);
+
 ALTER TABLE `cart`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
@@ -437,7 +457,7 @@ ALTER TABLE medicine_information ADD Tenant_ID varchar(255);
 ALTER TABLE user_access ADD Tenant_ID varchar(255);
 ALTER TABLE bill_information ADD Tenant_ID varchar(255);
 ALTER TABLE user_information ADD Tenant_ID varchar(255);
-ALTER TABLE cart ADD Tenant_ID varchar(255);
+ALTER TABLE inventory_master ADD Tenant_ID varchar(255);
 
 
 UPDATE user_access SET Tenant_ID = 1 WHERE Usertype = 'Admin';
