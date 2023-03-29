@@ -42,7 +42,7 @@
                     <tbody>
                     <% billInfo.forEach(function(item){ %>
                     <tr>
-                        <td><%= item.Invoice_No %></td>
+                        <td><a href="/admin/invoice/<%= item.Invoice_No %>"><%= item.Invoice_No %></a></td>
                         <td><%= item.Date %></td>
                         <td><%= item.Total_Amount %></td>
                         <td><%= item.Discount %></td>

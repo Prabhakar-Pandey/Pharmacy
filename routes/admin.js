@@ -6,6 +6,7 @@ var async = require('async');
 var mysql = require('mysql');
 var DBQuery = require('../db_query');
 const { uuid } = require('uuidv4');
+var tenantConfig = require('../tenantConfig');
 
 
 router.use(bodyParser.urlencoded({
@@ -95,14 +96,16 @@ router.get('/', function (req, res) {
 
 router.post('/medicineSearch', function (req, res) {
 
-    var name = req.body.name;  
-    db.execute(DBQuery.medicine_information.getMedicineAvailability,[name, req.session.Tenant_ID]).then(data=>{
+    var name = req.body.name; 
+    var batch_id = req.body.batch_id; 
+    if(!batch_id){
+        return res.send(JSON.stringify({}));
+    }
+    db.execute(DBQuery.medicine_information.getMedicineAvailability,[name, req.session.Tenant_ID,batch_id]).then(data=>{
         console.log(data)
         const respObj = {
             [name]:data[0]
         };
-        
-
         res.send(JSON.stringify(respObj));
     })
 });
@@ -114,6 +117,17 @@ router.get('/user', function (req, res) {
     res.render('view_welcome', {
         user: req.session.loggedUser
     });
+});
+
+router.get('/invoice/:invoiceId', function (req, res) {
+    db.execute(DBQuery.cart.getCardByInvoiceId,req.params.invoiceId).then(data=>{
+        res.render('invoice', {
+            ...data[0],
+            tenant:tenantConfig[req.session.Tenant_ID],
+            Ordered_Item:JSON.parse(data[0].Ordered_Item),
+            dateToDispaly: new Date(data[0].Date).toLocaleDateString("en-US")
+        });
+    })
 });
 
 router.get('/logout', function (req, res) {
@@ -137,16 +151,41 @@ router.get('/sale', function (req, res) {
         };
         res.render('new_sale', data);
     })
-
-    // db.getData(query, null, function (rows) {
-    //     var data = {
-    //         'batch': rows,
-    //         user: req.session.loggedUser
-    //     };
-
-    //     res.render('new_sale', data);
-    // });
 });
+
+router.get('/inventory', function (req, res) {
+    var query = DBQuery.joins.inventory_medicine_information;
+    var arr = [
+        db.execute(query, req.session.Tenant_ID),
+    ];
+    
+    Promise.all(arr).then((values)=>{
+        console.log(values[0],values[1])
+        var data = {
+            'inventory': values[0],
+            user: req.session.loggedUser,
+            invoiceNumber: uuid()
+        };
+        res.render('inventory', data);
+    })
+});
+
+function updateInventory(Ordered_Item, req){
+    return new Promise((resolve,reject)=>{
+        console.log(Ordered_Item)
+        const upadateInventory = [];
+        Ordered_Item.forEach((item)=>{
+            upadateInventory.push(db.execute(DBQuery.inventory_master.updateQuantityByItem,[item.Quantity,item.Medicine_ID,item.Batch_ID,req.session.Tenant_ID]))
+        })
+        Promise.all([upadateInventory]).then(values=>{
+            resolve("Update Inventory")
+        }).catch(ex=>{
+            console.log(ex)
+            reject("Update Inventory Failed!")
+        })
+    })
+   
+}
 
 router.post('/sale', function (req, res) {
     var billInfo = {
@@ -166,10 +205,11 @@ router.post('/sale', function (req, res) {
         Tenant_ID:req.session.Tenant_ID
     }
     console.log(">>>>>>CART", billInfo, req.body.purchagedItem);
-    Promise.all([]).then(values=>{
+    Promise.all([
         db.execute(DBQuery.cart.addToCart,[cart]),
-        db.execute(DBQuery.bill_information.addBills,[billInfo]) 
-    }).then(values=>{
+        db.execute(DBQuery.bill_information.addBills,[billInfo]),
+        updateInventory(JSON.parse(req.body.purchagedItem), req)
+    ]).then(values=>{
         res.redirect('/admin/sale');
     })
 });
@@ -447,6 +487,7 @@ router.post('/batch/create', function (req, res) {
                 Cost_Price: req.body.cost_price,
                 Sell_Price: req.body.sell_price,
                 Expire_Date: req.body.expire_date,
+                Batch_ID: req.body.batch_id,
             }
             var arr = [
                 db.execute(DBQuery.batch.insertToBatch, batch),
@@ -455,15 +496,13 @@ router.post('/batch/create', function (req, res) {
 
             console.log(batch)
 
-            db.execute(DBQuery.inventory_master.fetchInventory,req.body.medicine_name).then(values=>{
-                console.log(values);
+            db.execute(DBQuery.inventory_master.fetchInventory,[req.body.medicine_name, req.session.Tenant_ID, req.body.batch_id]).then(values=>{
                 if(values.length){
                     inventory.Total_count = String(Number(values[0].Total_count) + Number(req.body.quantity));
                     arr.push(db.execute(DBQuery.inventory_master.updateInventory, [inventory,req.body.medicine_name]))
                 }else{
                     arr.push(db.execute(DBQuery.inventory_master.addInventory, [inventory]))
                 }
-                console.log(">>>>>",batch);
                 Promise.all(arr).then(values=>{
                     console.log("addede",values);
                     res.redirect('/admin/batch');

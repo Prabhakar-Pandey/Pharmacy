@@ -24,6 +24,7 @@
                                         <th>Cost Price</th>
                                         <th>Sell Price</th>
                                         <th>Expire Date</th>
+                                        <th>Batch Id</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -43,6 +44,9 @@
                                             </td>
                                             <td>
                                                 <%= item.Expire_Date %>
+                                            </td>
+                                            <td>
+                                                <%= item.Batch_ID %>
                                             </td>
                                         </tr>
                                         <% }) %>
@@ -93,9 +97,10 @@
                                 </tr>
                             </table>
                     </div>
-
-                    <div style=" background-color:#34495e; color:white; padding:10px;">Purchase Items List</div>
-                    <div id="orderItems" style="height:260px; overflow-y:scroll; border:1px solid #BFAEAE;">
+                    <div id="print_pdf">
+                        <div style=" background-color:#34495e; color:white; padding:10px;">Purchase Items List</div>
+                        <div id="orderItems" style="height:260px; overflow-y:scroll; border:1px solid #BFAEAE;">
+                        </div>
                     </div>
                     <div align="right">
                         <br />
@@ -150,7 +155,7 @@
                         <br />
                         <br />
 
-                        <input type="submit" class="btn btn-success btn-block" name="submit" value="Submit New Sell">
+                        <input id="generateBill" type="submit" class="btn btn-success btn-block" name="submit" value="Submit New Sell">
                     </div>
 
                     </form>
@@ -180,11 +185,12 @@
 
                 <script>
                     $("#getMedicineName").blur(function () {
-                        const medicineName = $('#getMedicineName').val().split('(')[0];
+                        const medicineName = $('#getMedicineName').val().split('|')[0];
+                        const batch_id = $('#getMedicineName').val().split('|')[2];
                         $.ajax({
                             url: "/admin/medicineSearch/",
                             method:"post",
-                            data: {name:medicineName},
+                            data: {name:medicineName,batch_id},
                             success: function (result) {
                                 console.log(result)
                                 window.MedicineFactory = JSON.parse(result)
@@ -218,7 +224,7 @@
 
                     //Calculate Amount based on input Quantity
                     $('#getQuantity').keyup(function () {
-                        const medicineName = $('#getMedicineName').val().split('(')[0];
+                        const medicineName = $('#getMedicineName').val().split('|')[0];
                         var available = window.MedicineFactory[medicineName].Total_count;
                         var quantity = Number($('#getQuantity').val());
                         var sellPrice = Number($('#getSellPrice').val());
@@ -274,17 +280,21 @@
                                 alert('Not A Valid Amount!');
                         }
                         else {
+                            const medicineName = $('#getMedicineName').val().split('|')[0];
                             purchaseItems.push({
-                                Medicine_Name: $('#getMedicineName').val(),
+                                Medicine_Name: medicineName,
+                                Medicine_ID:window.MedicineFactory[medicineName].Medicine_ID,
                                 Quantity: $('#getQuantity').val(),
                                 Cost: $('#getSellPrice').val(),
-                                Amount: $('#getAmount').val()
+                                Amount: $('#getAmount').val(),
+                                expiryDate : window.MedicineFactory[medicineName].Expire_Date,
+                                Batch_ID : window.MedicineFactory[medicineName].Batch_ID
                             });
 
                             if (purchaseItems.length > 0) {
                                 var $table = $('<table class="table table-bordered" id="mytable" border="1" cellpadding="10"/>');
                                 $table.append(
-                                    '<thead><tr><th>Medicine Name</th><th>Quantity</th><th>Rate</th><th>Amount</th></tr></thead>'
+                                    '<thead><tr><th>Medicine Name</th><th>Quantity</th><th>Batch Id</th><th>Expiry Date</th><th>Rate</th><th>Amount</th></tr></thead>'
                                 );
                                 var $tbody = $('<tbody/>');
 
@@ -292,6 +302,8 @@
                                     var $row = $('<tr class="salesItemsRows"/>');
                                     $row.append($('<td />').html(val.Medicine_Name));
                                     $row.append($('<td class="tdQuantity"/>').html(val.Quantity));
+                                    $row.append($('<td class="tdBatchId"/>').html(val.Batch_ID));
+                                    $row.append($('<td class="tdExpiryDate"/>').html(val.expiryDate));
                                     $row.append($('<td class="tdSellPrice"/>').html(val.Cost));
                                     $row.append($('<td/>').html(val.Amount));
                                     $tbody.append($row);
@@ -312,6 +324,13 @@
                         }
 
                     });
+
+                    $('#generateBill').on('click',function(){
+                        var divContents = $("#print_pdf").html();
+                        var printWindow = window.open('http://localhost:5000/admin/invoice/4a75928b-e0a4-4478-9b34-70cc201d03ce', '', 'height=400,width=800');
+                        printWindow.document.close();
+                        printWindow.print();
+                    })
 
 
                     $('#btnNext').on('click', function () {

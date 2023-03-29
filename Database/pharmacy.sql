@@ -406,7 +406,8 @@ CREATE TABLE `inventory_master` (
   `Tenant_ID` varchar(50) NOT NULL,
   `Cost_Price` varchar(50) NOT NULL,
   `Sell_Price` varchar(50) NOT NULL,
-  `Expire_Date` varchar(50) NOT NULL
+  `Expire_Date` varchar(50) NOT NULL,
+  `Batch_ID` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `inventory_master`
@@ -457,12 +458,14 @@ ALTER TABLE medicine_information ADD Tenant_ID varchar(255);
 ALTER TABLE user_access ADD Tenant_ID varchar(255);
 ALTER TABLE bill_information ADD Tenant_ID varchar(255);
 ALTER TABLE user_information ADD Tenant_ID varchar(255);
-ALTER TABLE inventory_master ADD Tenant_ID varchar(255);
+ALTER TABLE cart ADD Batch_ID varchar(255);
+
+ALTER TABLE cart MODIFY COLUMN Ordered_Item TEXT;
 
 
 UPDATE user_access SET Tenant_ID = 1 WHERE Usertype = 'Admin';
 
 SELECT medicine_information.Medicine_Name, sum(batch.Quantity) as Total_Quantity FROM medicine_information INNER JOIN batch ON medicine_information.id=batch.Medicine_ID group by medicine_information.id;
 
-
+UPDATE inventory_master SET Expire_Date = '2024-06-30', Batch_ID = '11123' WHERE Medicine_ID='3';
 

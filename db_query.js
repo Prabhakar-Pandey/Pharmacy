@@ -26,11 +26,11 @@ module.exports = {
     },
     medicine_information:{
         getMedicineByName:"SELECT * FROM medicine_information WHERE Medicine_Name = ? AND INNER JOIN batch ON medicine_information.id=batch.Medicine_ID",
-        getMedicineAvailability:"SELECT * FROM medicine_information INNER JOIN inventory_master ON medicine_information.id=inventory_master.Medicine_ID WHERE Medicine_Name = ? AND inventory_master.Tenant_ID = ?"
+        getMedicineAvailability:"SELECT * FROM medicine_information INNER JOIN inventory_master ON medicine_information.id=inventory_master.Medicine_ID WHERE Medicine_Name = ? AND inventory_master.Tenant_ID = ? AND inventory_master.Batch_ID = ? AND inventory_master.Total_count > 0"
     },
     joins:{
-        inventory_medicine_information:"SELECT b.*, m.Medicine_Name FROM inventory_master b INNER JOIN medicine_information m on b.Medicine_ID = m.ID WHERE b.Tenant_ID = ?",
-        medicine_information_inventory:"SELECT medicine_information.Medicine_Name, inventory_master.Total_count as Total_Quantity FROM medicine_information INNER JOIN inventory_master ON medicine_information.id=inventory_master.Medicine_ID WHERE inventory_master.Tenant_ID = ?",
+        inventory_medicine_information:"SELECT b.*, m.Medicine_Name FROM inventory_master b INNER JOIN medicine_information m on b.Medicine_ID = m.ID WHERE b.Tenant_ID = ? AND b.Total_count > 0",
+        medicine_information_inventory:"SELECT medicine_information.Medicine_Name, inventory_master.Total_count as Total_Quantity, inventory_master.Batch_ID FROM medicine_information INNER JOIN inventory_master ON medicine_information.id=inventory_master.Medicine_ID WHERE inventory_master.Tenant_ID = ?",
         batch_medicine_suplier:"SELECT b.*, m.Medicine_Name, s.Supplier_Name FROM batch b INNER JOIN medicine_information m on b.Medicine_ID = m.ID INNER JOIN supplier s on b.Supplier_ID = s.ID WHERE b.Tenant_ID = ?"
     },
     bill_information:{
@@ -40,12 +40,14 @@ module.exports = {
     },
     inventory_master:{
         addInventory:"INSERT INTO inventory_master SET ?",
-        fetchInventory:"SELECT * FROM inventory_master WHERE Medicine_ID = ?",
+        fetchInventory:"SELECT * FROM inventory_master WHERE Medicine_ID = ? AND Tenant_ID = ? AND Batch_ID = ?",
         fetchInventoryByTenant:"SELECT * FROM inventory_master WHERE Medicine_ID = ? AND Tenant_ID = ?",
-        updateInventory:"UPDATE inventory_master SET ? WHERE id = ?"
+        updateInventory:"UPDATE inventory_master SET ? WHERE id = ?",
+        updateQuantityByItem:"UPDATE inventory_master SET Total_count = Total_count - ? WHERE Medicine_ID = ? AND Batch_ID = ? AND Tenant_ID = ?"
     },
     cart:{
         addToCart:"INSERT INTO cart SET ?",
+        getCardByInvoiceId:"SELECT c.*, b.* FROM cart c INNER JOIN bill_information b ON c.Invoice_No = b.Invoice_No Where c.Invoice_No = ?"
     },
     drug_generic_name:{
         getGenericName:"SELECT * FROM drug_generic_name",

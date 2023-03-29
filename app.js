@@ -47,7 +47,7 @@ app.get('/search', function (req, res) {
   db.execute(DBQuery.joins.medicine_information_inventory, req.session.Tenant_ID).then(values=>{
     var data = [];
     values.forEach(element => {
-      data.push(`${element.Medicine_Name}(${element.Total_Quantity})`);
+      data.push(`${element.Medicine_Name}|${element.Total_Quantity}|${element.Batch_ID}`);
     });
     res.end(JSON.stringify(data));
   })
@@ -109,7 +109,7 @@ app.post('/', function (req, res) {
             errors: ''
           });
         } else {
-          user.tenant = tenantConfig[rows[0].Tenant_ID] || "Pharmacy Inventory"
+          user.tenant = tenantConfig[rows[0].Tenant_ID].displayName || "Pharmacy Inventory"
           if (rows[0].Usertype == 'Admin') {
 
             user.UserType = 'Admin';
