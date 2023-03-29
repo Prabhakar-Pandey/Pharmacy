@@ -44,7 +44,7 @@ connection.connect();
 
 
 app.get('/search', function (req, res) {
-  db.execute(DBQuery.joins.medicine_information_batch).then(values=>{
+  db.execute(DBQuery.joins.medicine_information_inventory, req.session.Tenant_ID).then(values=>{
     var data = [];
     values.forEach(element => {
       data.push(`${element.Medicine_Name}(${element.Total_Quantity})`);

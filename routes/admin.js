@@ -95,24 +95,13 @@ router.get('/', function (req, res) {
 
 router.post('/medicineSearch', function (req, res) {
 
-    var name = req.body.name;
-    var query = DBQuery.medicine_information.getMedicineByName;
-    
-    db.execute(DBQuery.medicine_information.getMedicineAvailability,[name]).then(data=>{
+    var name = req.body.name;  
+    db.execute(DBQuery.medicine_information.getMedicineAvailability,[name, req.session.Tenant_ID]).then(data=>{
         console.log(data)
         const respObj = {
-            [name]:{}
+            [name]:data[0]
         };
-        (data||[]).forEach(item=>{
-            respObj[name] = {
-                Cost_Price:respObj[name].Cost_Price?Math.max(respObj[name].Cost_Price,item.Cost_Price):item.Cost_Price,
-                Sell_Price:respObj[name].Sell_Price?Math.max(respObj[name].Sell_Price,item.Sell_Price):item.Sell_Price,
-                Expire_Date:respObj[name].Expire_Date ? Math.min(respObj[name].Expire_Date,item.Expire_Date):item.Expire_Date,
-                Quantity:respObj[name].Quantity ? respObj[name].Quantity + item.Quantity : item.Quantity,
-                Medicine_ID:item.Medicine_ID,
-                Location_ID:item.Location_ID
-            }
-        })
+        
 
         res.send(JSON.stringify(respObj));
     })
@@ -134,16 +123,15 @@ router.get('/logout', function (req, res) {
 
 
 router.get('/sale', function (req, res) {
-    var query = DBQuery.joins.medicine_information_suppliers;
+    var query = DBQuery.joins.inventory_medicine_information;
     var arr = [
-        db.execute(query, null),
-        db.execute(DBQuery.batch.getAgregatedQuantityValueByMedicineID)
+        db.execute(query, req.session.Tenant_ID),
     ];
     
     Promise.all(arr).then((values)=>{
+        console.log(values[0],values[1])
         var data = {
-            'batch': values[0],
-            'agregatedDataMap':values[1],
+            'inventory': values[0],
             user: req.session.loggedUser,
             invoiceNumber: uuid()
         };

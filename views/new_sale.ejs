@@ -19,27 +19,21 @@
                             <table class="table table-striped" id="mainTable">
                                 <thead>
                                     <tr>
-                                        <th>Batch ID</th>
                                         <th>Medicine Name</th>
                                         <th>Quantity</th>
                                         <th>Cost Price</th>
                                         <th>Sell Price</th>
-                                        <th>Production Date</th>
                                         <th>Expire Date</th>
-                                        <th>Supplier Name</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <% batch.forEach(function(item){ %>
+                                    <% inventory.forEach(function(item){ %>
                                         <tr>
-                                            <td>
-                                                <%= item.Batch_ID %>
-                                            </td>
                                             <td>
                                                 <%= item.Medicine_Name %>
                                             </td>
                                             <td>
-                                                <%= item.Quantity %>
+                                                <%= item.Total_count %>
                                             </td>
                                             <td>
                                                 <%= item.Cost_Price %>
@@ -48,13 +42,7 @@
                                                 <%= item.Sell_Price %>
                                             </td>
                                             <td>
-                                                <%= item.Production_Date %>
-                                            </td>
-                                            <td>
                                                 <%= item.Expire_Date %>
-                                            </td>
-                                            <td>
-                                                <%= item.Supplier_Name %>
                                             </td>
                                         </tr>
                                         <% }) %>
@@ -231,7 +219,7 @@
                     //Calculate Amount based on input Quantity
                     $('#getQuantity').keyup(function () {
                         const medicineName = $('#getMedicineName').val().split('(')[0];
-                        var available = window.MedicineFactory[medicineName].Quantity;
+                        var available = window.MedicineFactory[medicineName].Total_count;
                         var quantity = Number($('#getQuantity').val());
                         var sellPrice = Number($('#getSellPrice').val());
                         if (quantity > available) {

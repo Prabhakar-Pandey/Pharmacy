@@ -26,11 +26,11 @@ module.exports = {
     },
     medicine_information:{
         getMedicineByName:"SELECT * FROM medicine_information WHERE Medicine_Name = ? AND INNER JOIN batch ON medicine_information.id=batch.Medicine_ID",
-        getMedicineAvailability:"SELECT * FROM medicine_information INNER JOIN batch ON medicine_information.id=batch.Medicine_ID WHERE Medicine_Name = ?"
+        getMedicineAvailability:"SELECT * FROM medicine_information INNER JOIN inventory_master ON medicine_information.id=inventory_master.Medicine_ID WHERE Medicine_Name = ? AND inventory_master.Tenant_ID = ?"
     },
     joins:{
-        medicine_information_suppliers:"SELECT b.*, m.Medicine_Name, s.Supplier_Name FROM batch b INNER JOIN medicine_information m on b.Medicine_ID = m.ID INNER JOIN supplier s on b.Supplier_ID = s.ID",
-        medicine_information_batch:"SELECT medicine_information.Medicine_Name, sum(batch.Quantity) as Total_Quantity FROM medicine_information INNER JOIN batch ON medicine_information.id=batch.Medicine_ID group by medicine_information.id",
+        inventory_medicine_information:"SELECT b.*, m.Medicine_Name FROM inventory_master b INNER JOIN medicine_information m on b.Medicine_ID = m.ID WHERE b.Tenant_ID = ?",
+        medicine_information_inventory:"SELECT medicine_information.Medicine_Name, inventory_master.Total_count as Total_Quantity FROM medicine_information INNER JOIN inventory_master ON medicine_information.id=inventory_master.Medicine_ID WHERE inventory_master.Tenant_ID = ?",
         batch_medicine_suplier:"SELECT b.*, m.Medicine_Name, s.Supplier_Name FROM batch b INNER JOIN medicine_information m on b.Medicine_ID = m.ID INNER JOIN supplier s on b.Supplier_ID = s.ID WHERE b.Tenant_ID = ?"
     },
     bill_information:{
@@ -41,6 +41,7 @@ module.exports = {
     inventory_master:{
         addInventory:"INSERT INTO inventory_master SET ?",
         fetchInventory:"SELECT * FROM inventory_master WHERE Medicine_ID = ?",
+        fetchInventoryByTenant:"SELECT * FROM inventory_master WHERE Medicine_ID = ? AND Tenant_ID = ?",
         updateInventory:"UPDATE inventory_master SET ? WHERE id = ?"
     },
     cart:{
