@@ -44,22 +44,13 @@ connection.connect();
 
 
 app.get('/search', function (req, res) {
-  db.execute(DBQuery.joins.medicine_information_inventory, req.session.Tenant_ID).then(values=>{
+  db.execute(DBQuery.joins.medicine_information_inventory, req.session.Tenant_ID).then(values => {
     var data = [];
     values.forEach(element => {
       data.push(`${element.Medicine_Name}|${element.Total_Quantity}|${element.Batch_ID}`);
     });
     res.end(JSON.stringify(data));
   })
-
-  // connection.query('SELECT Medicine_Name from medicine_information where Medicine_Name like "%' + req.query.key + '%"', function (err, rows, fields) {
-  //   if (err) throw err;
-  //   var data = [];
-  //   for (i = 0; i < rows.length; i++) {
-  //     data.push(rows[i].Medicine_Name);
-  //   }
-  //   res.end(JSON.stringify(data));
-  // });
 });
 
 
@@ -95,7 +86,7 @@ app.post('/', function (req, res) {
         username: req.body.username,
         password: req.body.password,
         UserType: '',
-        Tenant_ID:'',
+        Tenant_ID: '',
       }
 
       var query = DBQuery.user_access.login;
@@ -153,59 +144,48 @@ app.get('/admin', function (req, res) {
 
   var connection = mysql.createConnection(DBQuery.connectionObj);
 
-async.parallel([
+  async.parallel([
     function (callback) {
-        connection.query(DBQuery.dashboard.totalSell, callback)
+      connection.query(DBQuery.dashboard.totalSell, req.session.Tenant_ID, callback)
     },
     function (callback) {
-        connection.query(DBQuery.dashboard.todaySell, callback)
+      connection.query(DBQuery.dashboard.todaySell, req.session.Tenant_ID, callback)
     },
     function (callback) {
-        connection.query(DBQuery.dashboard.totalUser, callback)
+      connection.query(DBQuery.dashboard.totalUser, req.session.Tenant_ID, callback)
     },
     function (callback) {
-        connection.query(DBQuery.dashboard.totalBatch, callback)
+      connection.query(DBQuery.dashboard.totalBatch, req.session.Tenant_ID, callback)
     },
     function (callback) {
-        connection.query(DBQuery.dashboard.totalMedicine, callback)
+      connection.query(DBQuery.dashboard.totalMedicine, req.session.Tenant_ID, callback)
     },
     function (callback) {
-        connection.query(DBQuery.dashboard.totalSupplier, callback)
+      connection.query(DBQuery.dashboard.totalSupplier, callback)
     },
     function (callback) {
-        connection.query(DBQuery.dashboard.totalCategory, callback)
+      connection.query(DBQuery.dashboard.totalCategory, callback)
     },
     function (callback) {
-        connection.query(DBQuery.dashboard.totalGeneric, callback)
+      connection.query(DBQuery.dashboard.totalGeneric, callback)
     },
     function (callback) {
-        connection.query(DBQuery.dashboard.totalManufac, callback)
+      connection.query(DBQuery.dashboard.totalManufac, callback)
     }
-], function (err, rows) {
-
-
-    console.log(rows[0][0]);
-    console.log(rows[1][0]);
-    console.log(rows[2][0]);
-
-
-    // those data needs to be shown on view_admin.ejs
-    // Dashboard page requires those data
-    // NOT WORKING PROPERLY
-
+  ], function (err, rows) {
     res.render('view_admin', {
-        'totalSell': rows[0][0],
-        'todaySell': rows[1][0],
-        'totalUser': rows[2][0],
-        'totalBatch': rows[3][0],
-        'totalMedicine': rows[4][0],
-        'totalSupplier': rows[5][0],
-        'totalCategory': rows[6][0],
-        'totalGeneric': rows[7][0],
-        'totalManufac': rows[8][0],
-        'user': req.session.loggedUser
+      'totalSell': rows[0][0],
+      'todaySell': rows[1][0],
+      'totalUser': rows[2][0],
+      'totalBatch': rows[3][0],
+      'totalMedicine': rows[4][0],
+      'totalSupplier': rows[5][0],
+      'totalCategory': rows[6][0],
+      'totalGeneric': rows[7][0],
+      'totalManufac': rows[8][0],
+      'user': req.session.loggedUser,
     });
-});
+  });
 
 
 

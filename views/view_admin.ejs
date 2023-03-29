@@ -21,21 +21,23 @@
                             <li>
                                 <img src="/assets/images/cash.ico" alt="todaysell">
                                 <h3>Today Sell</h3>
-                                <p>&#8369; 
+                                <p>&#x20B9; 
                                     <% todaySell.forEach(function(item){ %>
                                         <%= item.sells_count_today %> 
                                    <% }) %>
                                 </p>
                             </li>
+                            <% if (user.UserType == "Admin") { %>
                             <li>
                                 <img src="/assets/images/today-sell.png" alt="totalsell">
                                 <h3>Total Sell</h3>
-                                <p>&#8369;
+                                <p>&#x20B9;
                                     <% totalSell.forEach(function(item){ %>
                                          <%= item.sells_count %> 
                                     <% }) %>
                                 </p>
                             </li>
+                            
                             <li>
                                 <img src="/assets/images/user.ico" alt="user">
                                 <h3>Users</h3>
@@ -55,6 +57,7 @@
                                    <% }) %>
                                 </p>
                             </li>
+                            <% } %>
                             <li>
                                 <img src="/assets/images/medicine.png" alt="medicine">
                                 <h3>Total Medicines</h3>

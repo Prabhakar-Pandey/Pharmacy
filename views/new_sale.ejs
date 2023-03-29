@@ -14,7 +14,7 @@
                         </div>
                     </div>
 
-                    <div class="row">
+                    <!-- <div class="row">
                         <div class="col-lg-12">
                             <table class="table table-striped" id="mainTable">
                                 <thead>
@@ -53,7 +53,7 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    </div> -->
 
 
 
@@ -200,26 +200,7 @@
                         });
                     });
 
-                    document.getElementById('mainTable').onclick = function (event) {
-                        event = event || window.event;
-                        var target = event.target || event.srcElement;
-                        while (target && target.nodeName != 'TR') {
-                            target = target.parentElement;
-                        }
-                        var cells = target.cells;
-                        if (!cells.length || target.parentNode.nodeName == 'THEAD') {
-                            return;
-                        }
-                        $(function () {
-                            $('#getMedicineName').val($.trim(cells[1].innerHTML));
-                            $('#getSellPrice').val($.trim(cells[4].innerHTML));
-                        });
-                        //clears quantity and amount field
-                        $('#getQuantity').val('');
-                        $('#getAmount').val('');
-                        //focuses cursor on Qty field
-                        document.getElementById('getQuantity').focus();
-                    }
+                   
 
 
                     //Calculate Amount based on input Quantity

@@ -1,10 +1,10 @@
 module.exports = {
     dashboard : {
-        totalSell: "select ROUND(SUM(Total_Payable),2) AS sells_count from bill_information",
-        todaySell:"select ROUND(SUM(Total_Payable),2) AS sells_count_today from bill_information where Date = CURDATE()",
-        totalUser : "SELECT COUNT(*) AS users_count FROM user_information",
-        totalBatch:"SELECT COUNT(*) AS batch_count FROM batch",
-        totalMedicine:"SELECT COUNT(*) AS med_count FROM medicine_information",
+        totalSell: "select ROUND(SUM(Total_Payable),2) AS sells_count from bill_information WHERE Tenant_ID = ?",
+        todaySell:"select ROUND(SUM(Total_Payable),2) AS sells_count_today from bill_information where Date = CURDATE() AND Tenant_ID = ?",
+        totalUser : "SELECT COUNT(*) AS users_count FROM user_information WHERE Tenant_ID = ?",
+        totalBatch:"SELECT COUNT(*) AS batch_count FROM batch WHERE Tenant_ID = ?",
+        totalMedicine:"SELECT COUNT(*) AS med_count FROM medicine_information WHERE Tenant_ID = ?",
         totalSupplier:"SELECT COUNT(*) AS sup_count FROM supplier",
         totalCategory:"SELECT COUNT(*) AS cat_count FROM category",
         totalGeneric:"SELECT COUNT(*) AS generic_count FROM drug_generic_name",
@@ -30,7 +30,7 @@ module.exports = {
     },
     joins:{
         inventory_medicine_information:"SELECT b.*, m.Medicine_Name FROM inventory_master b INNER JOIN medicine_information m on b.Medicine_ID = m.ID WHERE b.Tenant_ID = ? AND b.Total_count > 0",
-        medicine_information_inventory:"SELECT medicine_information.Medicine_Name, inventory_master.Total_count as Total_Quantity, inventory_master.Batch_ID FROM medicine_information INNER JOIN inventory_master ON medicine_information.id=inventory_master.Medicine_ID WHERE inventory_master.Tenant_ID = ?",
+        medicine_information_inventory:"SELECT medicine_information.Medicine_Name, inventory_master.Total_count as Total_Quantity, inventory_master.Batch_ID FROM medicine_information INNER JOIN inventory_master ON medicine_information.id=inventory_master.Medicine_ID WHERE inventory_master.Tenant_ID = ? AND inventory_master.Total_count > 0",
         batch_medicine_suplier:"SELECT b.*, m.Medicine_Name, s.Supplier_Name FROM batch b INNER JOIN medicine_information m on b.Medicine_ID = m.ID INNER JOIN supplier s on b.Supplier_ID = s.ID WHERE b.Tenant_ID = ?"
     },
     bill_information:{

@@ -32,68 +32,6 @@ router.use('*', function (req, res, next) {
     next();
 });
 
-router.get('/', function (req, res) {
-
-    var connection = mysql.createConnection(DBQuery.connectionObj);
-
-    async.parallel([
-        function (callback) {
-            connection.query(DBQuery.dashboard.totalSell, callback)
-        },
-        function (callback) {
-            connection.query(DBQuery.dashboard.todaySell, callback)
-        },
-        function (callback) {
-            connection.query(DBQuery.dashboard.totalUser, callback)
-        },
-        function (callback) {
-            connection.query(DBQuery.dashboard.totalBatch, callback)
-        },
-        function (callback) {
-            connection.query(DBQuery.dashboard.totalMedicine, callback)
-        },
-        function (callback) {
-            connection.query(DBQuery.dashboard.totalSupplier, callback)
-        },
-        function (callback) {
-            connection.query(DBQuery.dashboard.totalCategory, callback)
-        },
-        function (callback) {
-            connection.query(DBQuery.dashboard.totalGeneric, callback)
-        },
-        function (callback) {
-            connection.query(DBQuery.dashboard.totalManufac, callback)
-        }
-    ], function (err, rows) {
-    
-    
-        console.log(rows[0][0]);
-        console.log(rows[1][0]);
-        console.log(rows[2][0]);
-    
-    
-        // those data needs to be shown on view_admin.ejs
-        // Dashboard page requires those data
-        // NOT WORKING PROPERLY
-    
-        res.render('view_admin', {
-            'totalSell': rows[0][0],
-            'todaySell': rows[1][0],
-            'totalUser': rows[2][0],
-            'totalBatch': rows[3][0],
-            'totalMedicine': rows[4][0],
-            'totalSupplier': rows[5][0],
-            'totalCategory': rows[6][0],
-            'totalGeneric': rows[7][0],
-            'totalManufac': rows[8][0],
-            'user': req.session.loggedUser
-        });
-    });
-    
-});
-
-
-
 router.post('/medicineSearch', function (req, res) {
 
     var name = req.body.name; 
